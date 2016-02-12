@@ -1,0 +1,21 @@
+{
+    "name":"PluralSight auto downloader",
+    "version":"0.1.0",
+    "manifest_version": 2,
+    "description":"A downloader for PluralSight videos",
+    "icons": {
+        "16": "icon-16.png",
+        "48": "icon-48.png",
+        "128": "icon-128.png"
+    },
+    "browser_action":{
+        "default_icon":"icon-48.png"
+    },
+    "permissions": [
+        "downloads",
+        "tabs",
+        "webRequest",
+        "*://app.pluralsight.com/*"
+    ],
+    "background":{ "scripts": ["background.js"] }
+}
