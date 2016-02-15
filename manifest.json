@@ -3,6 +3,11 @@
     "version":"0.1.0",
     "manifest_version": 2,
     "description":"A downloader for PluralSight videos",
+    "icons": {
+        "16": "img/icon-16.png",
+        "48": "img/icon-48.png",
+        "128": "img/icon-128.png"
+    },
     "permissions": [
         "downloads",
         "tabs",
@@ -13,9 +18,8 @@
     "page_action": {
         "default_title": "Print this page",
         "default_icon": {
-            "16": "icon-16.png",
-            "48": "icon-48.png",
-            "128": "icon-128.png"
+            "19": "img/icon-19.png",
+            "38": "img/icon-38.png"
         },
         "default_popup": "popup.html"
     },
