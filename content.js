@@ -160,4 +160,4 @@ function extractClips(initialState, requestBody) {
 }
 
 // Disable reporting
-injectJS('try { window.$YB.report = window.$YB.AjaxRequest.send = window.$YB.Communication.sendRequest = function(){}; } catch (e) { }');
+injectJS('try { window.$YB.report = $YB.AjaxRequest.prototype.send = window.$YB.Communication.prototype.sendRequest = window.$YB.Api.prototype.handlePing = function(){}; } catch (e) { }');
