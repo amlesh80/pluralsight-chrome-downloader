@@ -14,6 +14,12 @@ function injectJS(code) {
     document.body.appendChild(script);
 }
 
+function base64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+
 function respondOnAttribute(attr, callback) {
     var waitForAttr = function() {
         if (!document.body.hasAttribute(attr)) {
@@ -58,6 +64,20 @@ function fetchUrl(request, filename) {
     });
 }
 
+function fetchInitialState(callback) {
+
+    var attr = 'data-' + (new Date()).getTime();
+    injectJS(
+        '(function() {' +
+        '  if (initialState !== undefined) {' +
+        '     document.body.setAttribute("'+attr+'", JSON.stringify(initialState));' +
+        '  }' +
+        '})();'
+    );
+
+    respondOnAttribute(attr, callback);
+}
+
 // Padding left
 function padLeft(nr, n){
     return (new Array(n-String(nr).length+1)).join('0')+nr;
@@ -65,14 +85,67 @@ function padLeft(nr, n){
 
 // Listen to the initial state
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {
-    var attr = 'data-' + (new Date()).getTime();
 
-    if (msg.type !== 'download') {
-        return;
+    if (msg.type === 'download') {
+        downloadCourse(msg.requestInfo.request.body, response);
+
+        // Pause video
+        try {
+            Array.prototype.slice.call(document.getElementsByTagName('video'))
+                .forEach(function(elt) { elt.pause(); });
+        } catch (e) { }
+
+        return true;
     }
+    if (msg.type === 'downloadPlaylist') {
+        downloadPlaylist(msg.requestInfo.request.body);
+    }
+});
 
+function downloadPlaylist(requestBody) {
+    var escape = function escape(string) {
+        if (string === null || string === undefined) return;
+        return string.replace(/([&"<>'])/g, function(str, item) {
+            return escape.map[item];
+        })
+    };
+    escape.map = {
+        '>': '&gt;'
+        , '<': '&lt;'
+        , "'": '&apos;'
+        , '"': '&quot;'
+        , '&': '&amp;'
+    };
+
+    fetchInitialState(function (initialState) {
+        var clips = extractClips(initialState, requestBody);
+        var xml = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<playlist version="1" xmlns="http://xspf.org/ns/0/">',
+            '<trackList>'
+        ];
+
+        clips.forEach(function(clip) {
+            xml.push('<track>');
+            xml.push('<title>', escape(clip.title), '</title>');
+            xml.push('<location>', escape(clip.filename), '</location>');
+            xml.push('</track>');
+
+        });
+        xml.push('</trackList>', '</playlist>');
+
+        chrome.runtime.sendMessage({
+            type: 'downloadFile',
+            url: 'data:application/xspf+xml;base64,' + base64EncodeUnicode(xml.join('')),
+            filename: initialState.course.name + '.xspf'
+        });
+    });
+}
+
+function downloadCourse(requestBody, callback)
+{
     if (isDownloading) {
-        response({
+        callback({
             isDownloading: isDownloading,
             downloads: clipDownloads
         });
@@ -82,20 +155,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
     isDownloading = true;
 
     console.debug('Start downloading');
-    injectJS(
-        '(function() {' +
-        '  if (initialState !== undefined) {' +
-        '     document.body.setAttribute("'+attr+'", JSON.stringify(initialState));' +
-        '  }' +
-        '})();'
-    );
 
-    respondOnAttribute(attr, function (initialState) {
-        var clips = extractClips(initialState, msg.requestInfo.request.body);
+    fetchInitialState(function (initialState) {
+        var clips = extractClips(initialState, requestBody);
 
         var start = 0;
         clips.forEach(function(clip){
-            console.log('Start in ' + start + ' milliseconds');
             setTimeout(
                 function () { fetchUrl(clip.request, clip.filename); },
                 start
@@ -108,21 +173,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
         clipDownloads.start = (new Date()).getTime();
         clipDownloads.end = (new Date()).getTime() + start;
 
-        response({
-            isDownloading: true,
+        callback({
+            isDownloading: isDownloading,
             downloads: clipDownloads
         });
     });
-
-    // Pause video
-    try {
-        Array.prototype.slice.call(document.getElementsByTagName('video'))
-            .forEach(function(elt) { elt.pause(); });
-    } catch (e) {
-    }
-
-    return true;
-});
+}
 
 // Extract clip download information
 function extractClips(initialState, requestBody) {
@@ -146,6 +202,7 @@ function extractClips(initialState, requestBody) {
                         q: requestBody.q
                     },
 
+                    title: clip.title,
                     filename: initialState.course.name + '/' + [
                         padLeft(moduleNumber, 2),
                         padLeft(clipNumber, 2),

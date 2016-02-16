@@ -1,6 +1,8 @@
+var tabId;
+
 // Get active tabId
 chrome.tabs.query({active: true}, function(tabs) {
-    var tabId =  tabs[0].id;
+    tabId =  tabs[0].id;
 
     // Get course request data
     chrome.runtime.sendMessage({type: 'initialRequest', tabId: tabId}, function (requestInfo) {
@@ -8,8 +10,16 @@ chrome.tabs.query({active: true}, function(tabs) {
             return;
         }
 
-        // Tell content to download
-        chrome.tabs.sendMessage(tabId, {type: 'download', requestInfo: requestInfo}, displayStatus);
+        // Check for the course download
+        document.getElementById('dl-course').addEventListener('click', function () {
+            // Tell content to download
+            chrome.tabs.sendMessage(tabId, {type: 'download', requestInfo: requestInfo}, displayStatus);
+        });
+
+        // Check for the playlist download
+        document.getElementById('dl-playlist').addEventListener('click', function () {
+            chrome.tabs.sendMessage(tabId, {type: 'downloadPlaylist', requestInfo: requestInfo});
+        });
     });
 
 });
