@@ -3,23 +3,72 @@
   <head>
     <title>Pluralsight downloader</title>
     <style>
-    body {
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      background: white;
-    }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        width: 200px;
+      }
+
+      button {
+        padding: 10px 19px;
+        border-width: 0;
+        margin: 0;
+
+        background: #2c3e50;
+        color: #FFF;
+        display: inline-block;
+      }
+      h3 {
+        font-size: 1em;
+        padding: 10px 19px;
+        background: #2c3e50;
+        color: #FFF;
+        text-align: center;
+        margin: 0;
+      }
+      div {
+        background: #2c3e50;
+        color: #FFF;
+        text-align: center;
+      }
+
+      #dl-course {
+        width: 200px;
+        border-radius: 6px 6px 0 0;
+        border-top: 1px solid #FFF;
+        border-bottom: 1px solid #FFF;
+      }
+      #course-progress {
+        padding: 0 10px;
+        width: 100%;
+      }
+
+      #dl-playlist-m3u {
+        font-size: 0.9em;
+        width: 100px;
+        border-radius: 0 0 0 6px;
+        border-right: 1px solid #FFF;
+      }
+      #dl-playlist-xspf {
+        font-size: 0.9em;
+        width: 100px;
+        border-radius: 0 0 6px 0;
+      }
     </style>
-    <script src="popup.js"></script>
   </head>
   <body>
     <button id="dl-course">Download Course</button>
-    <button id="dl-playlist">Download Playlist</button>
     <div>
       <progress id="course-progress"></progress>
-    </div>
-    <div>
       <span id="end-time"></span>
     </div>
+    <h3>Download Playlist</h3>
+    <button id="dl-playlist-m3u">M3U</button><button id="dl-playlist-xspf">XSPF</button>
+
+    <script src="popup.js"></script>
   </body>
 </html>

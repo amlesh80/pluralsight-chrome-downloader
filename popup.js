@@ -10,15 +10,19 @@ chrome.tabs.query({active: true}, function(tabs) {
             return;
         }
 
-        // Check for the course download
+        chrome.tabs.sendMessage(tabId, {type: 'status', requestInfo: requestInfo}, displayStatus);
+
         document.getElementById('dl-course').addEventListener('click', function () {
             // Tell content to download
             chrome.tabs.sendMessage(tabId, {type: 'download', requestInfo: requestInfo}, displayStatus);
         });
 
-        // Check for the playlist download
-        document.getElementById('dl-playlist').addEventListener('click', function () {
-            chrome.tabs.sendMessage(tabId, {type: 'downloadPlaylist', requestInfo: requestInfo});
+        document.getElementById('dl-playlist-xspf').addEventListener('click', function () {
+            chrome.tabs.sendMessage(tabId, {type: 'downloadXSPF', requestInfo: requestInfo});
+        });
+
+        document.getElementById('dl-playlist-m3u').addEventListener('click', function () {
+            chrome.tabs.sendMessage(tabId, {type: 'downloadM3U', requestInfo: requestInfo});
         });
     });
 
@@ -26,10 +30,16 @@ chrome.tabs.query({active: true}, function(tabs) {
 
 function displayStatus(info) {
     var progress = document.getElementById('course-progress');
+    progress.style.display = 'block';
     progress.setAttribute('max', info.downloads.total);
     progress.setAttribute('value', info.downloads.downloaded);
 
-    var endTime = new Date();
-    endTime.setTime(info.downloads.end);
-    document.getElementById('end-time').appendChild(document.createTextNode(endTime.toTimeString()));
+    if (info.downloads.end !== null) {
+        var endTime = new Date();
+        endTime.setTime(info.downloads.end);
+        document.getElementById('end-time').appendChild(document.createTextNode(endTime.toTimeString()));
+    }
 }
+
+var progress = document.getElementById('course-progress');
+progress.style.display = 'none';
