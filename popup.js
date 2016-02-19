@@ -30,9 +30,13 @@ chrome.tabs.query({active: true}, function(tabs) {
 
 function displayStatus(info) {
     var progress = document.getElementById('course-progress');
-    progress.style.display = 'block';
-    progress.setAttribute('max', info.downloads.total);
-    progress.setAttribute('value', info.downloads.downloaded);
+    if (info.isDownloading) {
+        progress.style.display = 'block';
+        progress.setAttribute('max', info.downloads.total);
+        progress.setAttribute('value', info.downloads.downloaded);
+    } else {
+        progress.style.display = 'none';
+    }
 
     if (info.downloads.end !== null) {
         var endTime = new Date();
@@ -40,6 +44,3 @@ function displayStatus(info) {
         document.getElementById('end-time').appendChild(document.createTextNode(endTime.toTimeString()));
     }
 }
-
-var progress = document.getElementById('course-progress');
-progress.style.display = 'none';
