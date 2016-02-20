@@ -29,6 +29,7 @@
         color: #FFF;
         text-align: center;
         margin: 0;
+        border-radius: 6px 6px 0 0;
       }
       div {
         background: #2c3e50;
@@ -37,14 +38,20 @@
       }
 
       #dl-course {
-        width: 200px;
-        border-radius: 6px 6px 0 0;
-        border-top: 1px solid #FFF;
-        border-bottom: 1px solid #FFF;
+        width: 100px;
+        border-right: 1px solid #FFF;
+      }
+      #dl-course-unwatched {
+        width: 100px;
       }
       #course-progress {
         padding: 0 10px;
         width: 100%;
+      }
+      #dl-info {
+        min-height: 6px;
+        border-radius: 0 0 6px 6px;
+        border-bottom: 1px solid #FFF;
       }
 
       #dl-playlist-m3u {
@@ -61,11 +68,13 @@
     </style>
   </head>
   <body>
-    <button id="dl-course">Download Course</button>
-    <div>
+    <h3>Download</h3>
+    <button id="dl-course">All</button><button id="dl-course-unwatched">Unwatched</button>
+    <div id="dl-info">
       <progress id="course-progress"></progress>
       <span id="end-time"></span>
     </div>
+
     <h3>Download Playlist</h3>
     <button id="dl-playlist-m3u">M3U</button><button id="dl-playlist-xspf">XSPF</button>
 

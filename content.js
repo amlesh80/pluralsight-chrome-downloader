@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
 
     if (msg.type === 'download') {
         Course.get(requestInfo.course, requestInfo.request.body, function(course) {
-            course.download(response);
+            course.download(response, msg.hasOwnProperty('unwatched') && msg.unwatched);
         });
 
         return true;
@@ -188,6 +188,7 @@ var Course = function(initialState, requestBody) {
                         quality: requestBody.quality
                     },
 
+                    watched: clip.watched,
                     duration: clip.duration,
                     title: module.title + ' - ' + clip.title,
                     filename: initialState.course.name + '/' + [
@@ -234,8 +235,9 @@ Course.prototype.status = function () {
     };
 };
 
-Course.prototype.download = function(callback)
+Course.prototype.download = function(callback, unwatched)
 {
+    unwatched = !!unwatched;
     if (this.isDownloading) {
         callback(this.status());
         return;
@@ -245,7 +247,13 @@ Course.prototype.download = function(callback)
 
     var self = this;
     var start = 0;
+    var total = 0;
     this.clips.forEach(function(clip){
+        if (unwatched && clip.watched) {
+            return;
+        }
+        total++;
+
         setTimeout(
             function () {
                 PageInteraction.fetchUrl(clip.request, function(info) {
@@ -267,6 +275,7 @@ Course.prototype.download = function(callback)
     });
 
     this.downloads.start = (new Date()).getTime();
+    this.downloads.total = total;
     this.downloads.end = (new Date()).getTime() + start;
 
     callback(this.status());

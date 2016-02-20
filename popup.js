@@ -17,6 +17,11 @@ chrome.tabs.query({active: true}, function(tabs) {
             chrome.tabs.sendMessage(tabId, {type: 'download', requestInfo: requestInfo}, displayStatus);
         });
 
+        document.getElementById('dl-course-unwatched').addEventListener('click', function () {
+            // Tell content to download
+            chrome.tabs.sendMessage(tabId, {type: 'download', requestInfo: requestInfo, unwatched: true}, displayStatus);
+        });
+
         document.getElementById('dl-playlist-xspf').addEventListener('click', function () {
             chrome.tabs.sendMessage(tabId, {type: 'downloadXSPF', requestInfo: requestInfo});
         });
